@@ -1,0 +1,342 @@
+/* Video play overlay in preview */
+.video-play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+}
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Top controls container */
+.container-2 {
+    background: #2d2d2d;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #404040;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+/* Main container */
+.container {
+    display: flex;
+    height: calc(100vh - 70px);
+    overflow: hidden;
+}
+
+/* Image list - 75% width */
+#image-list {
+    width: 75%;
+    background: #1e1e1e;
+    border-right: 1px solid #404040;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 182px);
+    gap: 1rem;
+    align-content: start;
+}
+
+/* Custom scrollbar */
+#image-list::-webkit-scrollbar,
+.preview-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+#image-list::-webkit-scrollbar-track,
+.preview-panel::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+#image-list::-webkit-scrollbar-thumb,
+.preview-panel::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+
+#image-list::-webkit-scrollbar-thumb:hover,
+.preview-panel::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* Preview panel - 25% width */
+.preview-panel {
+    width: 25%;
+    background: #242424;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+}
+
+/* Image preview container */
+#main-preview-wrapper {
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #404040;
+    overflow: hidden;
+    min-height: 300px;
+    max-height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#image-preview {
+    max-width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+}
+
+/* Input styles */
+input[type="text"] {
+    padding: 0.75rem;
+    border: 1px solid #404040;
+    border-radius: 4px;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+input[type="text"]:focus {
+    border-color: #007acc;
+    background: #1e1e1e;
+}
+
+#tag-search {
+    width: 300px;
+}
+
+#tag-input {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* Button styles */
+button {
+    padding: 0.75rem 1rem;
+    background: #007acc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background: #005a9e;
+}
+
+button:active {
+    background: #004578;
+}
+
+/* Button container */
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.button-group button {
+    flex: 1;
+    font-size: 0.8rem;
+}
+
+#add-tag-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* Text styles */
+p {
+    color: #b0b0b0;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+}
+
+#file-name {
+    color: #e0e0e0;
+    word-break: break-all;
+}
+
+/* Tag list styles */
+#tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    min-height: 2rem;
+}
+
+.tag {
+    background: #404040;
+    color: #e0e0e0;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tag .remove-tag {
+    background: #666;
+    border: none;
+    color: white;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+}
+
+.tag .remove-tag:hover {
+    background: #888;
+}
+
+/* Thumbnail styles - matching your JS */
+.thumbnail {
+    /* background: #2d2d2d; */
+    /* border-radius: 8px */
+    /* border: 1px solid #404040; */
+    padding: 1rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* gap: 0.5rem; */
+    transition: border-color 0.2s ease;
+    width: 150px;
+    height: 150px;
+    /* Square boxes */
+    justify-self: center;
+    position: relative;
+}
+
+.thumbnail:hover {
+    border-color: #007acc;
+}
+
+.thumbnail.selected {
+    background: #1a3a5c;
+    border-color: #007acc;
+}
+
+.thumbnail img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Play icon from your JS */
+.play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    #image-list {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    #image-list {
+        width: 100%;
+        height: 60%;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .preview-panel {
+        width: 100%;
+        height: 40%;
+    }
+
+    .container-2 {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+
+    #tag-search {
+        width: 100%;
+    }
+}
+
+/* Loading and empty states */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: #b0b0b0;
+    font-size: 1.1rem;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #666;
+    text-align: center;
+    gap: 1rem;
+}
+
+.empty-state h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
