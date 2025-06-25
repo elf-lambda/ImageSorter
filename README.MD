@@ -4,14 +4,14 @@ A minimal Go-powered image browser and tagger for local photo and video folders.
 
 ## Features
 
--   📁 Auto-index images and `.webm` | `.gif` files from a folder
--   🏷️ Add/remove tags (stored in SQLite)
--   🔍 Search images by tag
--   🖼️ Lazy-loading image previews (via thumbnails)
--   🎞️ `.webm` playback with overlay controls
--   📋 Copy filename or full path for selected media
--   🧹 Rename all files to unix timestamp name hash
--   📁 Generate thumbnails using FFMPeg
+-   Auto-index images and `.webm` | `.gif` files from a folder
+-   Add/remove tags (stored in SQLite)
+-   Search images by tag
+-   Lazy-loading image previews (via thumbnails)
+-   `.webm` playback with overlay controls
+-   Copy filename or full path for selected media
+-   Rename all files to unix timestamp name hash
+-   Generate thumbnails using FFMPeg
 
 ## Usage
 
