@@ -14,11 +14,12 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/glebarez/sqlite"
 )
 
-var imageRootPath = `C:\Users\elff\Pictures`
+var imageRootPath = ``
 
 type ImageMeta struct {
 	Name         string
@@ -279,10 +280,94 @@ func getAllImageMeta(db *sql.DB) ([]ImageMeta, error) {
 // }
 
 func renameAllFilesAndUpdateDB(db *sql.DB, root string) error {
-	files := getImagesPath(root)
+	// db := initDB("images.db")
+	// defer db.Close()
+	images := getImagesPath(imageRootPath)
+	storeImages(db, images)
 
+	// backup - create daily backup folder
+	today := time.Now().Format("20060102")
+	backupDir := filepath.Join(root, "backups\\backup_"+today)
+	if err := os.MkdirAll(backupDir, 0755); err != nil {
+		return fmt.Errorf("failed to create backup directory: %w", err)
+	}
+
+	files := getImagesPath(root)
+	backedUpCount := 0
+	skippedCount := 0
+
+	// Build hash map of existing backup files ONCE
+	backupHashes := make(map[string]string) // hash -> filename
+	if entries, err := os.ReadDir(backupDir); err == nil {
+		for _, entry := range entries {
+			if entry.IsDir() {
+				continue
+			}
+
+			backupFilePath := filepath.Join(backupDir, entry.Name())
+			backupFile, err := os.Open(backupFilePath)
+			if err != nil {
+				continue
+			}
+
+			hasher := sha256.New()
+			if _, err := io.Copy(hasher, backupFile); err != nil {
+				backupFile.Close()
+				continue
+			}
+			backupFile.Close()
+
+			backupHash := fmt.Sprintf("%x", hasher.Sum(nil))
+			backupHashes[backupHash] = entry.Name()
+		}
+		log.Printf("Found %d existing backup files", len(backupHashes))
+	}
+
+	for _, img := range files {
+		src := filepath.Join(root, img.Name)
+		dst := filepath.Join(backupDir, img.Name)
+
+		// Check if file with same hash already exists using our pre-built map
+		if existingFile, exists := backupHashes[img.SHA256]; exists {
+			log.Printf("Backup: skipping %s (already backed up as %s)", img.Name, existingFile)
+			skippedCount++
+			continue
+		}
+
+		srcFile, err := os.Open(src)
+		if err != nil {
+			log.Printf("Backup: could not open %s: %v", img.Name, err)
+			continue
+		}
+
+		dstFile, err := os.Create(dst)
+		if err != nil {
+			log.Printf("Backup: could not create %s: %v", dst, err)
+			srcFile.Close()
+			continue
+		}
+
+		if _, err := io.Copy(dstFile, srcFile); err != nil {
+			log.Printf("Backup: failed to copy %s: %v", img.Name, err)
+			dstFile.Close()
+			srcFile.Close()
+			// Clean up partial file
+			os.Remove(dst)
+			continue
+		}
+
+		dstFile.Close()
+		srcFile.Close()
+		backedUpCount++
+		log.Printf("Backup: copied %s", img.Name)
+	}
+
+	log.Printf("Backup complete. %d files backed up, %d files skipped (already exist). Files saved to %s",
+		backedUpCount, skippedCount, backupDir)
+
+	// rename
 	var timeList []int64
-	for range len(files) {
+	for range files {
 		timeList = append(timeList, generateUnixFakeTime())
 	}
 	slices.Sort(timeList)

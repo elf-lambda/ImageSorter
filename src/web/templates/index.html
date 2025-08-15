@@ -10,6 +10,13 @@
 <body>
     <div class="container-2">
         <input type="text" id="tag-search" placeholder="Search by tag...">
+        <div class="toggle-group">
+            <label>
+                <input type="checkbox" id="hide-toggle" checked>
+                Hide images with tag:
+            </label>
+            <input type="text" id="hide-tag-input" placeholder="Enter tag to hide" value="">
+        </div>
         <div>
             <button onclick="renameAllFiles()">Rename All Files & Generate Thumbnail</button>
         </div>

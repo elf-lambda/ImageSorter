@@ -10,6 +10,8 @@ const tagInput = document.getElementById("tag-input");
 const addTagBtn = document.getElementById("add-tag-btn");
 const copyFullUrlBtn = document.getElementById("copy-full-url-btn");
 const copyFilenameBtn = document.getElementById("copy-filename-btn");
+const hideToggle = document.getElementById("hide-toggle");
+const hideTagInput = document.getElementById("hide-tag-input");
 
 const clearChildren = (element) => {
     while (element.firstChild) {
@@ -26,7 +28,7 @@ async function fetchImages() {
         const images = await res.json();
         allImages = images;
         initializeLazyLoadObserver();
-        renderImageList(images);
+        renderImageList(getFilteredImages());
     } catch (error) {
         console.error("Failed to fetch images:", error);
         alert("Failed to load images. Please check the console for details.");
@@ -64,16 +66,36 @@ function initializeLazyLoadObserver() {
     );
 }
 
+function getFilteredImages() {
+    let filteredImages = allImages;
+
+    // Apply tag search filter
+    const searchTag = tagSearchInput.value.trim().toLowerCase();
+    if (searchTag) {
+        filteredImages = filteredImages.filter(
+            (img) =>
+                Array.isArray(img.Tags) &&
+                img.Tags.some((t) => t.toLowerCase().includes(searchTag))
+        );
+    }
+
+    // Apply hide tag filter
+    if (hideToggle.checked) {
+        const hideTag = hideTagInput.value.trim().toLowerCase();
+        if (hideTag) {
+            filteredImages = filteredImages.filter(
+                (img) =>
+                    !Array.isArray(img.Tags) ||
+                    !img.Tags.some((t) => t.toLowerCase() === hideTag)
+            );
+        }
+    }
+
+    return filteredImages;
+}
+
 function filterImagesByTag(tag) {
-    const lowerTag = tag.toLowerCase();
-    const filteredImages = lowerTag
-        ? allImages.filter(
-              (img) =>
-                  Array.isArray(img.Tags) &&
-                  img.Tags.some((t) => t.toLowerCase().includes(lowerTag))
-          )
-        : allImages;
-    renderImageList(filteredImages);
+    renderImageList(getFilteredImages());
 }
 
 function renderImageList(images) {
@@ -282,13 +304,25 @@ window.onload = () => {
     fetchImages();
 
     addTagBtn.onclick = addTag;
+
+    // Update filtering when any filter input changes
     tagSearchInput.addEventListener("input", (e) => {
-        filterImagesByTag(e.target.value.trim());
+        renderImageList(getFilteredImages());
+    });
+
+    hideToggle.addEventListener("change", () => {
+        renderImageList(getFilteredImages());
+    });
+
+    hideTagInput.addEventListener("input", () => {
+        if (hideToggle.checked) {
+            renderImageList(getFilteredImages());
+        }
     });
 
     copyFullUrlBtn.onclick = () => {
         if (selectedImage) {
-            const fullUrl = `C:/Users/elff/Pictures/${selectedImage.Name}`;
+            const fullUrl = `C:\\Users\\void\\Pictures\\${selectedImage.Name}`;
             copyToClipboard(fullUrl);
         } else {
             alert("Please select an image first.");
